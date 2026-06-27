@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Android Forensics - Login & Register</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+            bottom: -2px;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-btn:hover {
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        input::placeholder {
+            color: #aaa;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .info-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 480px) {
+            .form-container {
+                padding: 25px;
+            }
+
+            .logo h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <!-- Logo -->
+            <div class="logo">
+                <h1>🔍 Android Forensics</h1>
+                <p>Spyware Detection & Analysis Platform</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'login')">Login</button>
+                <button class="tab-btn" onclick="switchTab(event, 'register')">Register</button>
+            </div>
+
+            <!-- LOGIN TAB -->
+            <div id="login" class="tab-content active">
+                <div class="message" id="loginMessage"></div>
+
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="loginId">Investigator ID</label>
+                        <input 
+                            type="text" 
+                            id="loginId" 
+                            placeholder="e.g., INV001"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input 
+                            type="password" 
+                            id="loginPassword" 
+                            placeholder="Enter your password"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="btn" id="loginBtn">
+                        Sign In
+                    </button>
+                </form>
+
+                <div class="info-text" style="text-align: center; margin-top: 15px;">
+                    Don't have an account? <a href="#" onclick="switchTab(event, 'register')" style="color: #667eea; text-decoration: none; font-weight: 600;">Register here</a>
+                </div>
+            </div>
+
+            <!-- REGISTER TAB -->
+            <div id="register" class="tab-content">
+                <div class="message" id="registerMessage"></div>
+
+                <form id="registerForm" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="regId">Investigator ID</label>
+                        <input 
+                            type="text" 
+                            id="regId" 
+                            placeholder="e.g., INV001"
+                            pattern="[A-Z0-9]+"
+                            required
+                        >
+                        <div class="info-text">Unique identifier (letters & numbers only)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regName">Full Name</label>
+                        <input 
+                            type="text" 
+                            id="regName" 
+                            placeholder="e.g., John Doe"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regEmail">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="regEmail" 
+                            placeholder="e.g., john@zetech.ac.ke"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regPassword">Password</label>
+                        <input 
+                            type="password" 
+                            id="regPassword" 
+                            placeholder="Min 6 characters"
+                            minlength="6"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regPasswordConfirm">Confirm Password</label>
+                        <input 
+                            type="password" 
+                            id="regPasswordConfirm" 
+                            placeholder="Re-enter password"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="btn" id="registerBtn">
+                        Create Account
+                    </button>
+                </form>
+
+                <div class="info-text" style="text-align: center; margin-top: 15px;">
+                    Already have an account? <a href="#" onclick="switchTab(event, 'login')" style="color: #667eea; text-decoration: none; font-weight: 600;">Login here</a>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>🔐 Secure forensic investigation platform</p>
+                <p>© 2024 Zetech University</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL
+        const API_URL = 'http://localhost:5000/api';
+
+        // Switch between login and register tabs
+        function switchTab(event, tab) {
+            event.preventDefault();
+            
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tab).classList.add('active');
+            event.target.classList.add('active');
+
+            // Clear messages
+            hideMessage('loginMessage');
+            hideMessage('registerMessage');
+        }
+
+        // Show message helper
+        function showMessage(elementId, message, type) {
+            const msgEl = document.getElementById(elementId);
+            msgEl.textContent = message;
+            msgEl.className = `message show ${type}`;
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                hideMessage(elementId);
+            }, 5000);
+        }
+
+        // Hide message helper
+        function hideMessage(elementId) {
+            const msgEl = document.getElementById(elementId);
+            msgEl.classList.remove('show');
+        }
+
+        // HANDLE LOGIN
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            const investigator_id = document.getElementById('loginId').value;
+            const password = document.getElementById('loginPassword').value;
+            const btn = document.getElementById('loginBtn');
+
+            // Validate
+            if (!investigator_id || !password) {
+                showMessage('loginMessage', '❌ Please fill all fields', 'error');
+                return;
+            }
+
+            // Show loading state
+            btn.innerHTML = '<span class="spinner"></span>Signing in...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        investigator_id,
+                        password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Save token & user info
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('investigator_id', data.investigator_id);
+                    localStorage.setItem('name', data.name);
+                    localStorage.setItem('role', data.role);
+
+                    showMessage('loginMessage', `✅ Welcome, ${data.name}!`, 'success');
+                    
+                    // Redirect to dashboard after 1.5 seconds
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                } else {
+                    showMessage('loginMessage', `❌ ${data.error || 'Login failed'}`, 'error');
+                }
+            } catch (error) {
+                showMessage('loginMessage', `❌ Connection error: ${error.message}`, 'error');
+                console.error('Login error:', error);
+            } finally {
+                btn.innerHTML = 'Sign In';
+                btn.disabled = false;
+            }
+        }
+
+        // HANDLE REGISTER
+        async function handleRegister(event) {
+            event.preventDefault();
+
+            const investigator_id = document.getElementById('regId').value;
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+            const btn = document.getElementById('registerBtn');
+
+            // Validate
+            if (!investigator_id || !name || !email || !password) {
+                showMessage('registerMessage', '❌ Please fill all fields', 'error');
+                return;
+            }
+
+            // Validate ID format
+            if (!/^[A-Z0-9]+$/.test(investigator_id)) {
+                showMessage('registerMessage', '❌ ID must be uppercase letters & numbers only', 'error');
+                return;
+            }
+
+            // Validate password match
+            if (password !== passwordConfirm) {
+                showMessage('registerMessage', '❌ Passwords do not match', 'error');
+                return;
+            }
+
+            // Validate password length
+            if (password.length < 6) {
+                showMessage('registerMessage', '❌ Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            // Show loading state
+            btn.innerHTML = '<span class="spinner"></span>Creating account...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        investigator_id,
+                        name,
+                        email,
+                        password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage('registerMessage', `✅ Account created! Please login with your credentials.`, 'success');
+                    
+                    // Clear form
+                    document.getElementById('registerForm').reset();
+                    
+                    // Switch to login tab after 2 seconds
+                    setTimeout(() => {
+                        // Create fake event to pass to switchTab
+                        const fakeEvent = new Event('click');
+                        const loginBtn = document.querySelector('.tab-btn');
+                        fakeEvent.target = loginBtn;
+                        loginBtn.click();
+                        
+                        // Also manually fill login form with credentials
+                        document.getElementById('loginId').value = investigator_id;
+                        document.getElementById('loginPassword').focus();
+                    }, 2000);
+                } else {
+                    showMessage('registerMessage', `❌ ${data.error || 'Registration failed'}`, 'error');
+                }
+            } catch (error) {
+                showMessage('registerMessage', `❌ Connection error: ${error.message}`, 'error');
+                console.error('Register error:', error);
+            } finally {
+                btn.innerHTML = 'Create Account';
+                btn.disabled = false;
+            }
+        }
+
+        // Check if already logged in
+        window.addEventListener('load', () => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                // User is already logged in, redirect to dashboard
+                window.location.href = 'dashboard.html';
+            }
+        });
+    </script>
+</body></html>

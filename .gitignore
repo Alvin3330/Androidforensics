@@ -1,0 +1,7 @@
+.env
+db/forensics.db
+db/forensics.db-shm
+db/forensics.db-wal
+db/forensics.db.corrupted
+AndroidForensics/reports
+AndroidForensics/node_modules
