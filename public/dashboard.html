@@ -512,7 +512,8 @@
 </div>
 
 <script>
-const API_URL = 'http://localhost:5000/api';
+// FIXED: API_URL now points to Render backend
+const API_URL = 'https://androidforensics.onrender.com/api';
 let currentViewingCase   = null;
 let currentDeletingCaseId = null;
 let connectedDevice      = null;
@@ -713,7 +714,7 @@ function onMethodChange() {
     ipGroup.style.display = method === 'usb' ? 'none' : 'block';
 }
 
-// ── connectDevice — THE FIXED VERSION ────────────────────────
+// ── connectDevice — FIXED: Uses API_URL ────────────────────────
 async function connectDevice() {
     const method = document.getElementById('connMethod').value;
     const ip     = document.getElementById('deviceIp').value.trim();
@@ -739,7 +740,8 @@ async function connectDevice() {
     btn.disabled  = true;
 
     try {
-        const res  = await fetch('/api/android/connect', {
+        // FIXED: Use API_URL instead of relative path
+        const res  = await fetch(`${API_URL}/android/connect`, {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             // Always send ip — backend ignores it for USB
@@ -781,9 +783,10 @@ function setConnected(device) {
     document.getElementById('scanBtn').disabled = false;
 }
 
+// FIXED: Uses API_URL instead of relative path
 async function refreshDevices() {
     try {
-        const res  = await fetch('/api/android/devices');
+        const res  = await fetch(`${API_URL}/android/devices`);
         const data = await res.json();
 
         // Backend returns currentDevices (live ADB) and allDevices (DB history)
@@ -835,8 +838,8 @@ async function startScan() {
     }, 2500);
 
     try {
-        // If case is selected → use detection route (YARA + DB), else android route
-        const endpoint = caseId ? `${API_URL}/detection/scan` : '/api/android/scan';
+        // FIXED: Use API_URL instead of relative path
+        const endpoint = caseId ? `${API_URL}/detection/scan` : `${API_URL}/android/scan`;
         const body     = caseId
             ? { caseId: parseInt(caseId), deviceSerial: connectedDevice.id || connectedDevice.ip }
             : { deviceIp: connectedDevice.id || connectedDevice.ip, scanType, options };
@@ -943,5 +946,4 @@ async function generateReport() {
     finally { btn.innerHTML = '📄 Generate PDF Report'; btn.disabled = false; }
 }
 </script>
-</body>
-</html>
+</body></html>

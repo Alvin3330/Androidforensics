@@ -368,7 +368,6 @@
     </div>
 
     <!-- SCANS -->
-    <!-- FIX: route changed to /api/android/scans (requires new backend endpoint — see note) -->
     <div class="tab-content" id="scans">
         <div class="controls">
             <div class="search-box">
@@ -491,7 +490,8 @@
 <div class="toast" id="errorToast"></div>
 
 <script>
-    const API_BASE = '/api/android';
+    // FIXED: API_BASE now points to Render backend
+    const API_BASE = 'https://androidforensics.onrender.com/api/android';
 
     // ------------------------------------------------
     // Helpers
@@ -649,8 +649,6 @@
 
     // ------------------------------------------------
     // Scans
-    // FIX: calls GET /api/android/scans — add this endpoint to your backend
-    //      (see note at bottom of file)
     // ------------------------------------------------
     async function loadScans() {
         try {
@@ -727,7 +725,6 @@
 
     // ------------------------------------------------
     // Investigators
-    // FIX: calls GET /api/android/investigators — add this endpoint to your backend
     // ------------------------------------------------
     async function loadInvestigators() {
         try {
@@ -760,7 +757,6 @@
 
     // ------------------------------------------------
     // Audit Log
-    // FIX: calls GET /api/android/audit — add this endpoint to your backend
     // ------------------------------------------------
     async function loadAuditLog() {
         try {
